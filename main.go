@@ -3,7 +3,6 @@ package main
 import (
 	"image"
 	"log"
-	"sync"
 
 	"github.com/disintegration/imaging"
 	flag "github.com/ogier/pflag"
@@ -25,18 +24,6 @@ func main() {
 		log.Fatalf("failed to open image: %v", err)
 	}
 
-	if *histogram {
-		var wg sync.WaitGroup
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-			BuildHistogram(src)
-		}()
-
-		wg.Wait()
-	}
-
 	inverted := imaging.Invert(src)
 
 	if len(*profile) > 0 {
@@ -52,6 +39,10 @@ func main() {
 		} else {
 			log.Fatal("profile not found")
 		}
+	}
+
+	if *histogram {
+		BuildHistogram(inverted)
 	}
 
 	err = imaging.Save(inverted, *outFile)

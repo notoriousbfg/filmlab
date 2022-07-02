@@ -8,4 +8,5 @@ filmlab
     --out="./inverted.png"
     --profile="HP5Plus" // Portra160/HP5Plus/ColorPlus
     --preset="dark" // light/mid/dark
+    --histogram
 ```
