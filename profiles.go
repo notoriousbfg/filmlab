@@ -2,7 +2,6 @@ package main
 
 import (
 	"image"
-	"image/color"
 
 	"github.com/disintegration/imaging"
 )
@@ -33,13 +32,18 @@ func (h HP5Plus) Adjust(image *image.NRGBA, preset string) *image.NRGBA {
 		image = imaging.AdjustBrightness(image, 10)
 		image = imaging.AdjustGamma(image, 0.55)
 		image = imaging.AdjustSigmoid(image, 0.9, 8.0)
-	case "mid", "dark":
+	case "mid":
 		image = adjustColours(image, 30, 5, 5)
 		image = imaging.AdjustBrightness(image, 35)
 		image = imaging.AdjustGamma(image, 0.6)
 		image = imaging.AdjustSigmoid(image, 0.9, 8.0)
+	case "dark":
+		image = adjustColours(image, 33, 0, 0)
+		image = imaging.AdjustBrightness(image, 35)
+		image = imaging.AdjustGamma(image, 0.7)
+		image = imaging.AdjustSigmoid(image, 0.8, 8.0)
+		image = imaging.AdjustContrast(image, 10)
 	}
-
 	return image
 }
 
@@ -52,19 +56,5 @@ func (c ColorPlus) Adjust(image *image.NRGBA, preset string) *image.NRGBA {
 	image = imaging.AdjustContrast(image, 25)
 	image = imaging.AdjustBrightness(image, 25)
 	image = imaging.AdjustGamma(image, 0.6)
-	return image
-}
-
-func adjustColours(image *image.NRGBA, r int, g int, b int) *image.NRGBA {
-	image = imaging.AdjustFunc(
-		image,
-		func(c color.NRGBA) color.NRGBA {
-			r := adjustColourValue(int(c.R), r)
-			g := adjustColourValue(int(c.G), g)
-			b := adjustColourValue(int(c.B), b)
-
-			return color.NRGBA{uint8(r), uint8(g), uint8(b), c.A}
-		},
-	)
 	return image
 }
