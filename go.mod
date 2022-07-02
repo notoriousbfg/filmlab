@@ -7,4 +7,5 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/ogier/pflag v0.0.1 // indirect
 	golang.org/x/image v0.0.0-20220617043117-41969df76e82 // indirect
+	gonum.org/v1/plot v0.11.0 // indirect
 )

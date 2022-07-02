@@ -2,11 +2,14 @@ package main
 
 import (
 	"image"
-	"image/color"
 	"log"
+	"sync"
 
 	"github.com/disintegration/imaging"
 	flag "github.com/ogier/pflag"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
 )
 
 func main() {
@@ -14,6 +17,7 @@ func main() {
 	outFile := flag.String("out", "./inverted.jpg", "the outputted file")
 	profile := flag.String("profile", "", "the film profile")
 	preset := flag.String("preset", "mid", "the brightness preset: light,dark,mid")
+	histogram := flag.Bool("histogram", false, "whether to generate a histogram")
 	flag.Parse()
 
 	src, err := imaging.Open(*srcFile)
@@ -38,6 +42,18 @@ func main() {
 		}
 	}
 
+	if *histogram {
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			BuildHistogram(inverted)
+		}()
+
+		wg.Wait()
+	}
+
 	err = imaging.Save(inverted, *outFile)
 	if err != nil {
 		log.Fatalf("failed to save image: %v", err)
@@ -46,28 +62,28 @@ func main() {
 	log.Printf("image generated")
 }
 
-func adjustColourValue(colour int, amount int) int {
-	colour = colour + amount
-
-	if colour > 255 {
-		return 255
-	} else if colour < 0 {
-		return 0
+func BuildHistogram(image *image.NRGBA) {
+	histValues := imaging.Histogram(image)
+	var values plotter.Values
+	for _, i := range histValues {
+		values = append(values, i)
 	}
-
-	return colour
+	histPlot(values)
 }
 
-func adjustColours(image *image.NRGBA, r int, g int, b int) *image.NRGBA {
-	image = imaging.AdjustFunc(
-		image,
-		func(c color.NRGBA) color.NRGBA {
-			r := adjustColourValue(int(c.R), r)
-			g := adjustColourValue(int(c.G), g)
-			b := adjustColourValue(int(c.B), b)
+func histPlot(values plotter.Values) {
+	p := plot.New()
 
-			return color.NRGBA{uint8(r), uint8(g), uint8(b), c.A}
-		},
-	)
-	return image
+	p.Title.Text = "histogram plot"
+
+	hist, err := plotter.NewHist(values, 20)
+	if err != nil {
+		panic(err)
+	}
+
+	p.Add(hist)
+
+	if err := p.Save(3*vg.Inch, 3*vg.Inch, "hist.png"); err != nil {
+		panic(err)
+	}
 }

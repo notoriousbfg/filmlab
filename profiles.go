@@ -2,6 +2,7 @@ package main
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/disintegration/imaging"
 )
@@ -56,5 +57,31 @@ func (c ColorPlus) Adjust(image *image.NRGBA, preset string) *image.NRGBA {
 	image = imaging.AdjustContrast(image, 25)
 	image = imaging.AdjustBrightness(image, 25)
 	image = imaging.AdjustGamma(image, 0.6)
+	return image
+}
+
+func adjustColourValue(colour int, amount int) int {
+	colour = colour + amount
+
+	if colour > 255 {
+		return 255
+	} else if colour < 0 {
+		return 0
+	}
+
+	return colour
+}
+
+func adjustColours(image *image.NRGBA, r int, g int, b int) *image.NRGBA {
+	image = imaging.AdjustFunc(
+		image,
+		func(c color.NRGBA) color.NRGBA {
+			r := adjustColourValue(int(c.R), r)
+			g := adjustColourValue(int(c.G), g)
+			b := adjustColourValue(int(c.B), b)
+
+			return color.NRGBA{uint8(r), uint8(g), uint8(b), c.A}
+		},
+	)
 	return image
 }
