@@ -25,6 +25,18 @@ func main() {
 		log.Fatalf("failed to open image: %v", err)
 	}
 
+	if *histogram {
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			BuildHistogram(src)
+		}()
+
+		wg.Wait()
+	}
+
 	inverted := imaging.Invert(src)
 
 	if len(*profile) > 0 {
@@ -42,18 +54,6 @@ func main() {
 		}
 	}
 
-	if *histogram {
-		var wg sync.WaitGroup
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-			BuildHistogram(inverted)
-		}()
-
-		wg.Wait()
-	}
-
 	err = imaging.Save(inverted, *outFile)
 	if err != nil {
 		log.Fatalf("failed to save image: %v", err)
@@ -62,7 +62,7 @@ func main() {
 	log.Printf("image generated")
 }
 
-func BuildHistogram(image *image.NRGBA) {
+func BuildHistogram(image image.Image) {
 	histValues := imaging.Histogram(image)
 	var values plotter.Values
 	for _, i := range histValues {
