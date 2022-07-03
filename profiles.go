@@ -15,11 +15,20 @@ type Portra160 struct {
 }
 
 func (p Portra160) Adjust(image *image.NRGBA, preset string) *image.NRGBA {
-	image = adjustColours(image, 60, 10, -15)
-	image = imaging.AdjustSigmoid(image, 0.95, 10.0)
-	image = imaging.AdjustContrast(image, 25)
-	image = imaging.AdjustBrightness(image, 27)
-	image = imaging.AdjustGamma(image, 0.6)
+	switch preset {
+	case "light":
+		image = adjustColours(image, 67, 10, -25)
+		image = imaging.AdjustSigmoid(image, 0.9, 8.0)
+		image = imaging.AdjustContrast(image, 25)
+		image = imaging.AdjustBrightness(image, 20)
+		image = imaging.AdjustGamma(image, 0.6)
+	case "mid", "dark":
+		image = adjustColours(image, 70, 12, -30)
+		image = imaging.AdjustSigmoid(image, 0.9, 8.0)
+		image = imaging.AdjustContrast(image, 25)
+		image = imaging.AdjustBrightness(image, 20)
+		image = imaging.AdjustGamma(image, 0.7)
+	}
 	return image
 }
 
