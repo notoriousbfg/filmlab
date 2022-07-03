@@ -42,8 +42,8 @@ func (h HP5Plus) Adjust(image *image.NRGBA, preset string) *image.NRGBA {
 		image = adjustColours(image, 33, 0, 0)
 		image = imaging.AdjustBrightness(image, 35)
 		image = imaging.AdjustGamma(image, 0.7)
-		image = imaging.AdjustSigmoid(image, 0.8, 8.0)
-		image = imaging.AdjustContrast(image, 10)
+		image = imaging.AdjustSigmoid(image, 0.7, 8.0)
+		image = imaging.AdjustContrast(image, 20)
 	}
 	return image
 }
